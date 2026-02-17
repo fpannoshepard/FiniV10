@@ -222,7 +222,15 @@
       font-size:12px;color:var(--muted2);margin-bottom:10px;
       text-align:left;
     }
-    .row{display:flex;align-items:center;justify-content:space-between;gap:12px;}
+
+    /* ===== PATCH: Center the inner "boxes within boxes" via a 2-col grid ===== */
+    .row{
+      display:grid;
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+      gap:12px;
+      align-items:center;
+      width:100%;
+    }
 
     /* Standardize token buttons (same height, consistent feel) */
     .token-btn{
@@ -231,8 +239,13 @@
       background:rgba(255,255,255,.04);
       color:var(--text);cursor:pointer;
       transition: transform var(--t), background var(--t), border-color var(--t);
-      font-weight:850;min-width:170px;justify-content:space-between;
+      font-weight:850;
+      justify-content:space-between;
       height:44px;
+
+      /* ===== PATCH: fill the grid cell (prevents "hugging" edges) ===== */
+      width:100%;
+      min-width:0;
     }
     .token-btn:hover{background:rgba(255,255,255,.06);transform:translateY(-1px);}
     .token-left{display:flex;align-items:center;gap:10px;min-width:0;}
@@ -257,7 +270,11 @@
       border-color: rgba(255,255,255,.12);
     }
 
-    .amt{flex:1;text-align:right;}
+    .amt{
+      /* ===== PATCH: fill the grid cell ===== */
+      width:100%;
+      text-align:right;
+    }
     .amt input{
       width:100%;background:transparent;border:none;outline:none;color:var(--text);
       font-size:26px;font-weight:900;letter-spacing:.2px;text-align:right;padding:0;
@@ -458,7 +475,6 @@
     @media (max-width:540px){
       main{padding:22px 12px 36px;}
       .card-inner{padding:14px;}
-      .token-btn{min-width:150px;}
       .amt input{font-size:22px;}
       .wallet-title{font-size:24px;}
     }
@@ -530,7 +546,7 @@
       text-align:center;
     }
 
-    /* ===== EDIT: Center the box around the Select Wallet control ===== */
+    /* ===== Center the box around the Select Wallet control ===== */
     #connectWalletWrap{
       width:100%;
       max-width:var(--ctrl-max);
@@ -656,6 +672,10 @@
       flex-direction:column;
       gap:12px;
       align-items:center; /* center the controls container */
+      width:100%;
+      max-width:var(--ctrl-max);
+      margin-left:auto;
+      margin-right:auto;
     }
 
     /* Make bank dropdown match swap connect style */
@@ -697,6 +717,18 @@
       background-repeat:no-repeat;
     }
     .bank-select select:disabled{opacity:.55;cursor:not-allowed;}
+
+    /* ===== PATCH: ensure the bank select wrapper is centered as a "box within box" ===== */
+    #bankSelectWrap{
+      width:100%;
+      max-width:var(--ctrl-max);
+      margin:0 auto;
+      display:flex;
+      justify-content:center;
+    }
+    #bankSelectWrap .bank-select{
+      margin:0; /* wrapper handles centering */
+    }
   </style>
 </head>
 
@@ -795,14 +827,15 @@
               <span id="recHint">Required</span>
             </div>
             <div class="row">
-              <button class="token-btn" id="recipientBtn" type="button" style="min-width:220px;">
+              <button class="token-btn" id="recipientBtn" type="button" style="min-width:0;">
                 <span class="token-left">
                   <span class="ticon dark" id="recIcon">R</span>
                   <span class="token-name" id="recipientName">Select counterparty</span>
                 </span>
                 <span class="chev" aria-hidden="true"></span>
               </button>
-              <div style="flex:1;text-align:right;color:rgba(234,240,255,.55);font-size:12px;">&nbsp;</div>
+              <!-- PATCH: let the grid create the second column cleanly -->
+              <div aria-hidden="true"></div>
             </div>
           </div>
 
@@ -877,7 +910,7 @@
 
           <div class="bank-actions">
             <!-- Hidden until user continues past info modal -->
-            <div id="bankSelectWrap" style="display:none;width:100%;max-width:var(--ctrl-max);margin:0 auto;">
+            <div id="bankSelectWrap" style="display:none;">
               <div class="bank-select">
                 <div class="left">
                   <span class="ticon dark" aria-hidden="true">🏦</span>
@@ -1613,7 +1646,7 @@
         onClick: () => {
           closeModal(true);
           bankSelectInfoShown = true;
-          $("bankSelectWrap").style.display = "block";
+          $("bankSelectWrap").style.display = "flex";
         }
       }]
     });
